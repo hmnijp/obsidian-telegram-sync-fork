@@ -1,21 +1,21 @@
 import TelegramSyncPlugin from "src/main";
-import { App, ButtonComponent, Notice, PluginSettingTab, Setting, TextComponent } from "obsidian";
+import { App, ButtonComponent, PluginSettingTab, Setting, TextComponent } from "obsidian";
 import TelegramBot from "node-telegram-bot-api";
 import { createProgressBar, updateProgressBar, deleteProgressBar, ProgressBarType } from "src/telegram/bot/progressBar";
 import * as Client from "src/telegram/user/client";
 import { BotSettingsModal } from "./modals/BotSettings";
 import { UserLogInModal } from "./modals/UserLogin";
-import {
-	releaseVersion,
-	versionALessThanVersionB,
-	telegramChannelLink,
-	privacyPolicyLink,
-	insiderFeaturesLink,
-} from "release-notes.mjs";
+// import {
+// 	releaseVersion,
+// 	versionALessThanVersionB,
+// 	telegramChannelLink,
+// 	privacyPolicyLink,
+// 	insiderFeaturesLink,
+// } from "release-notes.mjs";
 import { _15sec, _1sec, _5sec, displayAndLog, _day } from "src/utils/logUtils";
 import { getTopicId } from "src/telegram/bot/message/getters";
 import * as User from "../telegram/user/user";
-import { replaceMainJs } from "src/utils/fsUtils";
+// import { replaceMainJs } from "src/utils/fsUtils";
 import { KeysOfConnectionStatusIndicatorType } from "src/ConnectionStatusIndicator";
 import { enqueue } from "src/utils/queues";
 import {
@@ -144,7 +144,7 @@ export class TelegramSyncSettingTab extends PluginSettingTab {
 
 	async display(): Promise<void> {
 		this.containerEl.empty();
-		this.addSettingsHeader();
+		// this.addSettingsHeader();
 
 		await this.addBot();
 		await this.addUser();
@@ -156,8 +156,8 @@ export class TelegramSyncSettingTab extends PluginSettingTab {
 		new Setting(this.containerEl).setName("Insider features").setHeading();
 		this.subscribedOnInsiderChannel = await Client.subscribedOnInsiderChannel();
 		await this.addProcessOldMessages();
-		await this.addBetaRelease();
-		this.addTelegramChannel();
+		// await this.addBetaRelease();
+		// this.addTelegramChannel();
 		await this.setRefreshInterval();
 	}
 
@@ -166,34 +166,34 @@ export class TelegramSyncSettingTab extends PluginSettingTab {
 		clearInterval(this.refreshIntervalId);
 	}
 
-	addSettingsHeader() {
-		const versionContainer = this.containerEl.createDiv();
-		versionContainer.style.display = "flex";
-		versionContainer.style.justifyContent = "space-between";
-		versionContainer.createSpan().createEl("h1", {
-			text: `Telegram Sync ${
-				versionALessThanVersionB(this.plugin.manifest.version, this.plugin.settings.betaVersion)
-					? this.plugin.settings.betaVersion
-					: releaseVersion
-			}`,
-		});
-
-		const privacyPolicyButton = versionContainer.createSpan().createEl("a", {
-			text: "Privacy Policy",
-			href: privacyPolicyLink,
-		});
-		privacyPolicyButton.style.fontSize = "0.75em";
-		privacyPolicyButton.style.color = "LightCoral";
-		privacyPolicyButton.style.textDecoration = "None";
-
-		this.containerEl.createEl("div", { text: "Created by " }).createEl("a", {
-			text: "soberhacker🍃🧘💻",
-			href: "https://github.com/soberhacker",
-		});
-
-		this.containerEl.createEl("br");
-		this.containerEl.createEl("br");
-	}
+	// addSettingsHeader() {
+	// 	const versionContainer = this.containerEl.createDiv();
+	// 	versionContainer.style.display = "flex";
+	// 	versionContainer.style.justifyContent = "space-between";
+	// 	versionContainer.createSpan().createEl("h1", {
+	// 		text: `Telegram Sync ${
+	// 			versionALessThanVersionB(this.plugin.manifest.version, this.plugin.settings.betaVersion)
+	// 				? this.plugin.settings.betaVersion
+	// 				: releaseVersion
+	// 		}`,
+	// 	});
+	//
+	// 	const privacyPolicyButton = versionContainer.createSpan().createEl("a", {
+	// 		text: "Privacy Policy",
+	// 		href: privacyPolicyLink,
+	// 	});
+	// 	privacyPolicyButton.style.fontSize = "0.75em";
+	// 	privacyPolicyButton.style.color = "LightCoral";
+	// 	privacyPolicyButton.style.textDecoration = "None";
+	//
+	// 	this.containerEl.createEl("div", { text: "Created by " }).createEl("a", {
+	// 		text: "soberhacker🍃🧘💻",
+	// 		href: "https://github.com/soberhacker",
+	// 	});
+	//
+	// 	this.containerEl.createEl("br");
+	// 	this.containerEl.createEl("br");
+	// }
 
 	async addBot() {
 		const botSettings = new Setting(this.containerEl)
@@ -379,56 +379,56 @@ export class TelegramSyncSettingTab extends PluginSettingTab {
 		});
 	}
 
-	async addBetaRelease() {
-		const disabled = !this.plugin.userConnected || !this.subscribedOnInsiderChannel;
-
-		const installed = "Installed\n\nRestart the plugin or Obsidian to apply the changes";
-
-		new Setting(this.containerEl)
-			.setName("Beta release")
-			.setDesc(
-				"Install the latest beta release to be among the first to try out new features. It will launch during the plugin's next load",
-			)
-			.addButton(async (btn) => {
-				btn.setDisabled(disabled);
-				btn.setTooltip("Install Beta Release");
-				btn.setWarning();
-				btn.setIcon("install");
-				btn.onClick(async () => {
-					const notice = new Notice("Downloading...", _day);
-					try {
-						const betaRelease = await Client.getLastBetaRelease(this.plugin.manifest.version);
-						notice.setMessage(`Installing...`);
-						await replaceMainJs(this.app.vault, betaRelease.mainJs);
-						this.plugin.settings.betaVersion = betaRelease.betaVersion;
-						await this.plugin.saveSettings();
-						notice.setMessage(installed);
-					} catch (e) {
-						notice.setMessage(e);
-					}
-				});
-			})
-			.addButton(async (btn) => {
-				btn.setTooltip("Return to production release");
-				btn.setIcon("undo-glyph");
-				btn.setDisabled(disabled);
-				btn.onClick(async () => {
-					if (!this.plugin.settings.betaVersion) {
-						new Notice(`You already have the production version of the plugin installed`, _5sec);
-						return;
-					}
-					const notice = new Notice("Installing...", _day);
-					try {
-						await replaceMainJs(this.app.vault, "main-prod.js");
-						this.plugin.settings.betaVersion = "";
-						await this.plugin.saveSettings();
-						notice.setMessage(installed);
-					} catch (e) {
-						notice.setMessage("Error during return to production release: " + e);
-					}
-				});
-			});
-	}
+	// async addBetaRelease() {
+	// 	const disabled = !this.plugin.userConnected || !this.subscribedOnInsiderChannel;
+	//
+	// 	const installed = "Installed\n\nRestart the plugin or Obsidian to apply the changes";
+	//
+	// 	new Setting(this.containerEl)
+	// 		.setName("Beta release")
+	// 		.setDesc(
+	// 			"Install the latest beta release to be among the first to try out new features. It will launch during the plugin's next load",
+	// 		)
+	// 		.addButton(async (btn) => {
+	// 			btn.setDisabled(disabled);
+	// 			btn.setTooltip("Install Beta Release");
+	// 			btn.setWarning();
+	// 			btn.setIcon("install");
+	// 			btn.onClick(async () => {
+	// 				const notice = new Notice("Downloading...", _day);
+	// 				try {
+	// 					const betaRelease = await Client.getLastBetaRelease(this.plugin.manifest.version);
+	// 					notice.setMessage(`Installing...`);
+	// 					await replaceMainJs(this.app.vault, betaRelease.mainJs);
+	// 					this.plugin.settings.betaVersion = betaRelease.betaVersion;
+	// 					await this.plugin.saveSettings();
+	// 					notice.setMessage(installed);
+	// 				} catch (e) {
+	// 					notice.setMessage(e);
+	// 				}
+	// 			});
+	// 		})
+	// 		.addButton(async (btn) => {
+	// 			btn.setTooltip("Return to production release");
+	// 			btn.setIcon("undo-glyph");
+	// 			btn.setDisabled(disabled);
+	// 			btn.onClick(async () => {
+	// 				if (!this.plugin.settings.betaVersion) {
+	// 					new Notice(`You already have the production version of the plugin installed`, _5sec);
+	// 					return;
+	// 				}
+	// 				const notice = new Notice("Installing...", _day);
+	// 				try {
+	// 					await replaceMainJs(this.app.vault, "main-prod.js");
+	// 					this.plugin.settings.betaVersion = "";
+	// 					await this.plugin.saveSettings();
+	// 					notice.setMessage(installed);
+	// 				} catch (e) {
+	// 					notice.setMessage("Error during return to production release: " + e);
+	// 				}
+	// 			});
+	// 		});
+	// }
 
 	async addProcessOldMessages() {
 		const disabled = !this.plugin.userConnected || !this.subscribedOnInsiderChannel;
@@ -460,32 +460,32 @@ export class TelegramSyncSettingTab extends PluginSettingTab {
 			});
 	}
 
-	addTelegramChannel() {
-		const telegramChannelSetting = new Setting(this.containerEl)
-			.setName("Telegram Sync Insider channel")
-			.setDesc(
-				"By connecting your user to the plugin and subscribing to our Telegram channel, you'll get access to the latest beta versions, several months ahead of public release, and unlock for free ",
-			)
-			.addButton((btn: ButtonComponent) => {
-				if (this.subscribedOnInsiderChannel) btn.setButtonText("Open");
-				else {
-					btn.setButtonText("Unlock Features for Free");
-					btn.setClass("mod-cta");
-				}
-				btn.onClick(async () => {
-					if (!this.subscribedOnInsiderChannel)
-						displayAndLog(
-							this.plugin,
-							"After channel subscription, connect your Telegram user (if not done) and refresh the plugin settings for insider features",
-						);
-					window.open(telegramChannelLink, "_blank");
-				});
-			});
-		telegramChannelSetting.descEl.createEl("a", {
-			href: insiderFeaturesLink,
-			text: "all insider features",
-		});
-	}
+	// addTelegramChannel() {
+	// 	const telegramChannelSetting = new Setting(this.containerEl)
+	// 		.setName("Telegram Sync Insider channel")
+	// 		.setDesc(
+	// 			"By connecting your user to the plugin and subscribing to our Telegram channel, you'll get access to the latest beta versions, several months ahead of public release, and unlock for free ",
+	// 		)
+	// 		.addButton((btn: ButtonComponent) => {
+	// 			if (this.subscribedOnInsiderChannel) btn.setButtonText("Open");
+	// 			else {
+	// 				btn.setButtonText("Unlock Features for Free");
+	// 				btn.setClass("mod-cta");
+	// 			}
+	// 			btn.onClick(async () => {
+	// 				if (!this.subscribedOnInsiderChannel)
+	// 					displayAndLog(
+	// 						this.plugin,
+	// 						"After channel subscription, connect your Telegram user (if not done) and refresh the plugin settings for insider features",
+	// 					);
+	// 				window.open(telegramChannelLink, "_blank");
+	// 			});
+	// 		});
+	// 	telegramChannelSetting.descEl.createEl("a", {
+	// 		href: insiderFeaturesLink,
+	// 		text: "all insider features",
+	// 	});
+	// }
 
 	async storeTopicName(msg: TelegramBot.Message) {
 		const bot = this.plugin.bot;
