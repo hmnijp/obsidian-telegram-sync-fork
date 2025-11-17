@@ -67,6 +67,21 @@ export class MessageDistributionRulesModal extends Modal {
 		setSettingStyles(setting);
 	}
 
+	addFrontmatterTemplateFilePath() {
+		const setting = new Setting(this.messageDistributionRulesDiv)
+			.setName("Frontmatter template file path")
+			.setDesc("Specify path to template file you want to apply only to new notes")
+			.addSearch((cb) => {
+				new FileSuggest(cb.inputEl, this.plugin);
+				cb.setPlaceholder("example: templates/tg_group_frontmatter.md")
+					.setValue(this.messageDistributionRule.templateFilePath)
+					.onChange(async (path) => {
+						this.messageDistributionRule.templateFilePath = path ? normalizePath(path) : path;
+					});
+			});
+		setSettingStyles(setting);
+	}
+
 	addTemplateFilePath() {
 		const setting = new Setting(this.messageDistributionRulesDiv)
 			.setName("Template file path")
