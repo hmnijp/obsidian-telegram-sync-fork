@@ -13,25 +13,22 @@ export let showBreakingChanges = true;
 
 const newFeatures = `In this release, security has been enhanced by encrypting the bot token`;
 export const breakingChanges = `⚠️ <b><i>Breaking changes!\n\nBot token may need to be re-entered.</i></b> ⚠️`;
-export const telegramChannelLink = "https://t.me/obsidian_telegram_sync";
-export const insiderFeaturesLink =
-	"https://github.com/soberhacker/obsidian-telegram-sync/blob/main/docs/Telegram%20Sync%20Insider%20Features.md";
-const telegramChannelAHref = `<a href='${telegramChannelLink}'>channel</a>`;
-const insiderFeaturesAHref = `<a href='${insiderFeaturesLink}'>insider features</a>`;
-const telegramChannelIntroduction = `Subscribe for free to the plugin's ${telegramChannelAHref} and enjoy access to ${insiderFeaturesAHref} and the latest beta versions, several months ahead of public release.`;
-const telegramChatLink = "<a href='https://t.me/tribute/app?startapp=sfFf'>chat</a>";
-const telegramChatIntroduction = `Join the plugin's ${telegramChatLink} - your space to seek advice, ask questions, and share knowledge (access via the tribute bot).`;
-const donation = `If you appreciate this plugin and would like to support its continued development, please consider donating through the buttons below or via Telegram Stars in the ${telegramChannelAHref}!`;
-const bestRegards = "Best regards,\nYour soberhacker🍃🧘💻\n⌞";
+// export const telegramChannelLink = "https://t.me/obsidian_telegram_sync";
+// export const insiderFeaturesLink =
+// 	"https://github.com/soberhacker/obsidian-telegram-sync/blob/main/docs/Telegram%20Sync%20Insider%20Features.md";
+// const telegramChannelAHref = `<a href='${telegramChannelLink}'>channel</a>`;
+// const insiderFeaturesAHref = `<a href='${insiderFeaturesLink}'>insider features</a>`;
+// const telegramChannelIntroduction = `Subscribe for free to the plugin's ${telegramChannelAHref} and enjoy access to ${insiderFeaturesAHref} and the latest beta versions, several months ahead of public release.`;
+// const telegramChatLink = "<a href='https://t.me/tribute/app?startapp=sfFf'>chat</a>";
+// const telegramChatIntroduction = `Join the plugin's ${telegramChatLink} - your space to seek advice, ask questions, and share knowledge (access via the tribute bot).`;
+// const donation = `If you appreciate this plugin and would like to support its continued development, please consider donating through the buttons below or via Telegram Stars in the ${telegramChannelAHref}!`;
+const bestRegards = "Best regards.";
 
 export const privacyPolicyLink = "https://github.com/soberhacker/obsidian-telegram-sync/blob/main/PRIVACY-POLICY.md";
 
 export const notes = `
 <u><b>Telegram Sync ${releaseVersion}</b></u>\n
 🆕 ${newFeatures}\n
-💡 ${telegramChannelIntroduction}\n
-💬 ${telegramChatIntroduction}\n
-🦄 ${donation}\n
 ${bestRegards}`;
 
 export function showBreakingChangesInReleaseNotes() {
