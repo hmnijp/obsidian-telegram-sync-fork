@@ -299,14 +299,15 @@ export async function transcribeAudio(
 }
 
 export async function subscribedOnInsiderChannel(): Promise<boolean> {
-	if (!client || !client.connected || _sessionType == "bot") return false;
-	try {
-		const { checkedClient } = await checkUserService();
-		const messages = await checkedClient.getMessages(insiderChannel, { limit: 1 });
-		return messages.length > 0;
-	} catch (e) {
-		return false;
-	}
+	return true;
+	// if (!client || !client.connected || _sessionType == "bot") return false;
+	// try {
+	// 	const { checkedClient } = await checkUserService();
+	// 	const messages = await checkedClient.getMessages(insiderChannel, { limit: 1 });
+	// 	return messages.length > 0;
+	// } catch (e) {
+	// 	return false;
+	// }
 }
 
 export async function getLastBetaRelease(currentVersion: string): Promise<{ betaVersion: string; mainJs: Buffer }> {
