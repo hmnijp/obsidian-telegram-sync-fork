@@ -197,6 +197,13 @@ async function getFrontmatterContent(
 	return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function isMediaFileExtension(path: string): boolean {
+	const lower = path.toLowerCase();
+	return [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".mp4", ".mov", ".avi", ".mkv", ".webm"].some(
+		(ext) => lower.endsWith(ext),
+	);
+}
+
 async function createNoteContent(
 	plugin: TelegramSyncPlugin,
 	notePath: string,
@@ -207,10 +214,25 @@ async function createNoteContent(
 ) {
 	const filesLinks: string[] = [];
 
+	// if (!error) {
+	// 	filesPaths.forEach((fp) => {
+	// 		const filePath = plugin.app.vault.getAbstractFileByPath(fp) as TFile;
+	// 		filesLinks.push(plugin.app.fileManager.generateMarkdownLink(filePath, notePath));
+	// 	});
 	if (!error) {
 		filesPaths.forEach((fp) => {
 			const filePath = plugin.app.vault.getAbstractFileByPath(fp) as TFile;
-			filesLinks.push(plugin.app.fileManager.generateMarkdownLink(filePath, notePath));
+
+			// obsidian basic Markdown link
+			const mdLink = plugin.app.fileManager.generateMarkdownLink(filePath, notePath);
+
+			// if the file is media then add "!" before "[["
+			if (isMediaFileExtension(filePath.path)) {
+				const embeddedLink = mdLink.replace("[[", "![[");
+				filesLinks.push(embeddedLink);
+			} else {
+				filesLinks.push(mdLink);
+			}
 		});
 	} else {
 		filesLinks.push(`[❌ error while handling file](${error})`);
