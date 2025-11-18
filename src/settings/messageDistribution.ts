@@ -40,6 +40,7 @@ export function createDefaultMessageFilterCondition(): MessageFilterCondition {
 export interface MessageDistributionRule {
 	messageFilterQuery: string;
 	messageFilterConditions: MessageFilterCondition[];
+	templateFrontmatterFilePath: string;
 	templateFilePath: string;
 	notePathTemplate: string;
 	filePathTemplate: string;
@@ -55,6 +56,7 @@ export function createDefaultMessageDistributionRule(): MessageDistributionRule 
 	return {
 		messageFilterQuery: defaultMessageFilterQuery,
 		messageFilterConditions: [createDefaultMessageFilterCondition()],
+		templateFrontmatterFilePath: "",
 		templateFilePath: "",
 		notePathTemplate: `${defaultTelegramFolder}/${defaultNoteNameTemplate}`,
 		filePathTemplate: `${defaultTelegramFolder}/{{file:type}}s/${defaultFileNameTemplate}`,
@@ -67,6 +69,7 @@ export function createBlankMessageDistributionRule(): MessageDistributionRule {
 	return {
 		messageFilterQuery: "",
 		messageFilterConditions: [],
+		templateFrontmatterFilePath: "",
 		templateFilePath: "",
 		notePathTemplate: "",
 		filePathTemplate: "",
@@ -121,6 +124,8 @@ export function getMessageDistributionRuleInfo(distributionRule: MessageDistribu
 	const messageDistributionRuleInfo: MessageDistributionRuleInfo = { name: "", description: "" };
 	if (distributionRule.notePathTemplate)
 		messageDistributionRuleInfo.description = `Note path: ${distributionRule.notePathTemplate}`;
+	else if (distributionRule.templateFrontmatterFilePath)
+		messageDistributionRuleInfo.description = `Frontmatter template file: ${distributionRule.templateFrontmatterFilePath}`;
 	else if (distributionRule.templateFilePath)
 		messageDistributionRuleInfo.description = `Template file: ${distributionRule.templateFilePath}`;
 	else if (distributionRule.filePathTemplate)

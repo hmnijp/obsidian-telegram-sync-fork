@@ -168,6 +168,8 @@ export async function handleMessageText(
 	if (noteFolderPath != ".") createFolderIfNotExist(plugin.app.vault, noteFolderPath);
 	else noteFolderPath = "";
 
+	const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, msg);
+
 	await enqueue(
 		appendContentToNote,
 		plugin.app.vault,
@@ -176,8 +178,23 @@ export async function handleMessageText(
 		distributionRule.heading,
 		plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
 		distributionRule.reversedOrder,
+		frontmatterContent,
 	);
 	await finalizeMessageProcessing(plugin, msg);
+}
+
+async function getFrontmatterContent(
+	plugin: TelegramSyncPlugin,
+	distributionRule: MessageDistributionRule,
+	msg: TelegramBot.Message,
+): Promise<string | undefined> {
+	const templatePath = distributionRule.templateFrontmatterFilePath;
+	if (!templatePath) return undefined;
+
+	const processed = await applyNoteContentTemplate(plugin, templatePath, msg, []);
+	const trimmed = processed.trim();
+
+	return trimmed.length > 0 ? trimmed : undefined;
 }
 
 async function createNoteContent(
@@ -331,6 +348,8 @@ async function handleMediaGroup(plugin: TelegramSyncPlugin, distributionRule: Me
 					mg.filesPaths,
 					mg.error,
 				);
+
+				const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, mg.initialMsg);
 				await enqueue(
 					appendContentToNote,
 					plugin.app.vault,
@@ -339,6 +358,7 @@ async function handleMediaGroup(plugin: TelegramSyncPlugin, distributionRule: Me
 					distributionRule.heading,
 					plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
 					distributionRule.reversedOrder,
+					frontmatterContent,
 				);
 				await finalizeMessageProcessing(plugin, mg.initialMsg, mg.error);
 			} catch (e) {
@@ -387,6 +407,8 @@ async function appendFileToNote(
 
 	const noteContent = await createNoteContent(plugin, notePath, msg, distributionRule, [filePath], error);
 
+	const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, msg);
+
 	await enqueue(
 		appendContentToNote,
 		plugin.app.vault,
@@ -395,6 +417,7 @@ async function appendFileToNote(
 		distributionRule.heading,
 		plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
 		distributionRule.reversedOrder,
+		frontmatterContent,
 	);
 }
 

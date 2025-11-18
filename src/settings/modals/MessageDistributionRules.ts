@@ -31,6 +31,7 @@ export class MessageDistributionRulesModal extends Modal {
 		this.modalEl.style.width = "60vw";
 		this.addHeader();
 		this.addMessageFilter();
+		this.addFrontmatterTemplateFilePath();
 		this.addTemplateFilePath();
 		this.addNotePathTemplate();
 		this.addFilePathTemplate();
@@ -74,9 +75,9 @@ export class MessageDistributionRulesModal extends Modal {
 			.addSearch((cb) => {
 				new FileSuggest(cb.inputEl, this.plugin);
 				cb.setPlaceholder("example: templates/tg_group_frontmatter.md")
-					.setValue(this.messageDistributionRule.templateFilePath)
+					.setValue(this.messageDistributionRule.templateFrontmatterFilePath)
 					.onChange(async (path) => {
-						this.messageDistributionRule.templateFilePath = path ? normalizePath(path) : path;
+						this.messageDistributionRule.templateFrontmatterFilePath = path ? normalizePath(path) : path;
 					});
 			});
 		setSettingStyles(setting);
