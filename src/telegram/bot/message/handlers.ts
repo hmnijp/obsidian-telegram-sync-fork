@@ -197,11 +197,29 @@ async function getFrontmatterContent(
 	return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function isMediaFileExtension(path: string): boolean {
-	const lower = path.toLowerCase();
-	return [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".mp4", ".mov", ".avi", ".mkv", ".webm"].some(
-		(ext) => lower.endsWith(ext),
-	);
+const IMAGE_EXTENSIONS = [".avif", ".bmp", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"];
+const AUDIO_EXTENSIONS = [".flac", ".m4a", ".mp3", ".ogg", ".wav", ".webm", ".3gp"];
+const VIDEO_EXTENSIONS = [".mkv", ".mov", ".mp4", ".ogv", ".webm"];
+const PDF_EXTENSIONS = [".pdf"];
+
+function isEmbedFileExtension(filePath: string, rule: MessageDistributionRule): boolean {
+	const lower = filePath.toLowerCase();
+
+	const embedImages = rule.embedImages ?? true;
+	const embedAudio = rule.embedAudio ?? true;
+	const embedVideo = rule.embedVideo ?? true;
+	const embedPdf = rule.embedPdf ?? true;
+
+	let exts: string[] = [];
+
+	if (embedImages) exts = exts.concat(IMAGE_EXTENSIONS);
+	if (embedAudio) exts = exts.concat(AUDIO_EXTENSIONS);
+	if (embedVideo) exts = exts.concat(VIDEO_EXTENSIONS);
+	if (embedPdf) exts = exts.concat(PDF_EXTENSIONS);
+
+	if (exts.length === 0) return false;
+
+	return exts.some((ext) => lower.endsWith(ext));
 }
 
 async function createNoteContent(
@@ -226,8 +244,8 @@ async function createNoteContent(
 			// obsidian basic Markdown link
 			const mdLink = plugin.app.fileManager.generateMarkdownLink(filePath, notePath);
 
-			// if the file is media then add "!" before "[["
-			if (isMediaFileExtension(filePath.path)) {
+			// to embed or not to embed
+			if (isEmbedFileExtension(filePath.path, distributionRule)) {
 				const embeddedLink = mdLink.replace("[[", "![[");
 				filesLinks.push(embeddedLink);
 			} else {
