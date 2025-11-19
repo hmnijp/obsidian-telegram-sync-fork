@@ -46,6 +46,11 @@ export interface MessageDistributionRule {
 	filePathTemplate: string;
 	reversedOrder: boolean;
 	heading: string;
+
+	embedImages: boolean;
+	embedAudio: boolean;
+	embedVideo: boolean;
+	embedPdf: boolean;
 }
 
 export const defaultTelegramFolder = "Telegram";
@@ -62,6 +67,11 @@ export function createDefaultMessageDistributionRule(): MessageDistributionRule 
 		filePathTemplate: `${defaultTelegramFolder}/{{file:type}}s/${defaultFileNameTemplate}`,
 		reversedOrder: false,
 		heading: "",
+
+		embedImages: true,
+		embedAudio: true,
+		embedVideo: true,
+		embedPdf: true,
 	};
 }
 
@@ -75,6 +85,11 @@ export function createBlankMessageDistributionRule(): MessageDistributionRule {
 		filePathTemplate: "",
 		reversedOrder: false,
 		heading: "",
+
+		embedImages: true,
+		embedAudio: true,
+		embedVideo: true,
+		embedPdf: true,
 	};
 }
 
