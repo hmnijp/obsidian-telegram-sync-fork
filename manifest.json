@@ -1,16 +1,10 @@
 {
-	"id": "telegram-sync",
-	"name": "Telegram Sync",
-	"version": "4.0.0",
+	"id": "telegram-sync-fork",
+	"name": "Telegram Sync Fork",
+	"version": "4.0.0-hmnijp.0",
 	"minAppVersion": "1.0.0",
 	"description": "Transfer messages and files from Telegram to Obsidian.",
-	"author": "soberhacker",
-	"authorUrl": "https://github.com/soberhacker/obsidian-telegram-sync",
-	"fundingUrl": {
-		"Buy me a coffee": "https://www.buymeacoffee.com/soberhacker",
-		"PayPal": "https://www.paypal.com/donate/?hosted_button_id=VYSCUZX8MYGCU",
-		"Ko-Fi": "https://ko-fi.com/soberhacker",
-		"Cryptocurrency": "https://nowpayments.io/donation?api_key=JMM7NE1-M4X4JY6-N8EK1GJ-H8XQXFK"
-	},
+	"author": "hmnijp (forked from soberhacker)",
+	"authorUrl": "https://github.com/hmnijp/obsidian-telegram-sync-fork",
 	"isDesktopOnly": true
 }

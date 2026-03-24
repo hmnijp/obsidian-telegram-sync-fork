@@ -1,5 +1,8 @@
-# Telegram Sync for Obsidian
+This repo forked from[soberhacker/obsidian-telegram-sync](https://github.com/soberhacker/obsidian-telegram-sync).
 
+
+# Telegram Sync for Obsidian
+  
 <a href="https://github.com/soberhacker/obsidian-telegram-sync/releases/latest">
 <img src="https://img.shields.io/github/v/release/soberhacker/obsidian-telegram-sync?label=plugin&display_name=tag&logo=obsidian&color=purple&logoColor=violet">
 </a>&nbsp;<a href="https://github.com/soberhacker/obsidian-telegram-sync">
