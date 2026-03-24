@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-telegram-sync-fork",
-	"version": "4.0.1-hmnijp",
+	"version": "4.0.2-hmnijp",
 	"description": "Transfer messages and files from Telegram bot to Obsidian.",
 	"main": "main.js",
 	"scripts": {

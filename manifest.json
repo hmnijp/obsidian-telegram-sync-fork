@@ -1,7 +1,7 @@
 {
 	"id": "telegram-sync-fork",
 	"name": "Telegram Sync Fork",
-	"version": "4.0.1-hmnijp",
+	"version": "4.0.2-hmnijp",
 	"minAppVersion": "1.0.0",
 	"description": "Transfer messages and files from Telegram to Obsidian.",
 	"author": "hmnijp (forked from soberhacker)",

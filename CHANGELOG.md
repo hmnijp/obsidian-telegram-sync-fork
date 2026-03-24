@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.2-hmnijp] (2026-03-24)
+merge from [renameduserid/obsidian-telegram-sync Fork](https://github.com/renameduserid/obsidian-telegram-sync)
+
+### Features
+
+* add frontmatter template support
+* add media embedding rules for messages
+
+
 ## [4.0.1-hmnijp] (2026-03-24)
 merge from [brake71/obsidian-telegram-sync Fork](https://github.com/brake71/obsidian-telegram-sync)
 
