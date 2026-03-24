@@ -32,7 +32,7 @@ const context = await esbuild.context({
 		"@lezer/common",
 		"@lezer/highlight",
 		"@lezer/lr",
-		...builtins,
+		...builtins.filter((m) => m !== "punycode"),
 	],
 	format: "cjs",
 	target: "es2018",
