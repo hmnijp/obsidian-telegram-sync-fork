@@ -64,6 +64,7 @@ export interface TelegramSyncSettings {
 	messageDistributionRules: MessageDistributionRule[];
 	defaultMessageDelimiter: boolean;
 	parallelMessageProcessing: boolean;
+	messageMergingIntervalSec: number;
 	processOldMessages: boolean;
 	processOldMessagesSettings: ProcessOldMessagesSettings;
 	processOtherBotsMessages: boolean;
@@ -88,6 +89,7 @@ export const DEFAULT_SETTINGS: TelegramSyncSettings = {
 	messageDistributionRules: [createDefaultMessageDistributionRule()],
 	defaultMessageDelimiter: true,
 	parallelMessageProcessing: false,
+	messageMergingIntervalSec: 0,
 	processOldMessages: false,
 	processOldMessagesSettings: getDefaultProcessOldMessagesSettings(),
 	processOtherBotsMessages: false,

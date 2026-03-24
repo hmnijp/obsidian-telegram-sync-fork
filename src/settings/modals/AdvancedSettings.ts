@@ -1,6 +1,5 @@
 import { Modal, Setting } from "obsidian";
 import TelegramSyncPlugin from "src/main";
-import { _5sec } from "src/utils/logUtils";
 import {
 	ConnectionStatusIndicatorType,
 	KeysOfConnectionStatusIndicatorType,
@@ -21,6 +20,7 @@ export class AdvancedSettingsModal extends Modal {
 		this.addDeleteMessagesFromTelegram();
 		this.addMessageDelimiterSetting();
 		this.addParallelMessageProcessing();
+		this.addMessageMergingIntervalSetting();
 	}
 
 	addHeader() {
@@ -42,6 +42,24 @@ export class AdvancedSettingsModal extends Modal {
 			});
 	}
 
+
+	addMessageMergingIntervalSetting() {
+		new Setting(this.advancedSettingsDiv)
+			.setName(`Message merge interval (seconds)`)
+			.setDesc(
+				"Messages from the same chat, topic and user received within this interval will be appended as one message block",
+			)
+			.addText((text) => {
+				text.setPlaceholder("0");
+				text.setValue(this.plugin.settings.messageMergingIntervalSec.toString());
+				text.onChange(async (value) => {
+					const parsed = Number(value);
+					if (!Number.isFinite(parsed)) return;
+					this.plugin.settings.messageMergingIntervalSec = Math.max(0, Math.round(parsed));
+					await this.plugin.saveSettings();
+				});
+			});
+	}
 	addParallelMessageProcessing() {
 		new Setting(this.advancedSettingsDiv)
 			.setName(`Parallel message processing`)
