@@ -21,7 +21,9 @@ export async function connect(plugin: TelegramSyncPlugin) {
 		const botOptions: TelegramBot.ConstructorOptions = {};
 		const proxy = plugin.settings.proxySettings;
 		if (proxy?.enabled && proxy.host && proxy.port) {
-			const auth = proxy.username ? `${encodeURIComponent(proxy.username)}:${encodeURIComponent(proxy.password)}@` : "";
+			const auth = proxy.username
+				? `${encodeURIComponent(proxy.username)}:${encodeURIComponent(proxy.password)}@`
+				: "";
 			botOptions.request = { proxy: `${proxy.protocol}://${auth}${proxy.host}:${proxy.port}` };
 		}
 		plugin.bot = new TelegramBot(await enqueue(plugin, plugin.getBotToken), botOptions);

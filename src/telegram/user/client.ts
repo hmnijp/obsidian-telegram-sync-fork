@@ -86,7 +86,12 @@ export async function init(sessionId: number, sessionType: SessionType, deviceId
 			baseLogger: logger,
 		};
 
-		if (proxy?.enabled && proxy.host && proxy.port && (proxy.protocol === "socks5" || proxy.protocol === "socks4")) {
+		if (
+			proxy?.enabled &&
+			proxy.host &&
+			proxy.port &&
+			(proxy.protocol === "socks5" || proxy.protocol === "socks4")
+		) {
 			clientParams.proxy = {
 				ip: proxy.host,
 				port: proxy.port,
