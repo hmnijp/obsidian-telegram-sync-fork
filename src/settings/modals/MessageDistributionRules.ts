@@ -31,10 +31,12 @@ export class MessageDistributionRulesModal extends Modal {
 		this.modalEl.style.width = "60vw";
 		this.addHeader();
 		this.addMessageFilter();
+		this.addFrontmatterTemplateFilePath();
 		this.addTemplateFilePath();
 		this.addNotePathTemplate();
 		this.addFilePathTemplate();
 		this.addHeading();
+		this.addEmbedSettings();
 		this.addMessageSortingMode();
 		this.addFooterButtons();
 	}
@@ -63,6 +65,21 @@ export class MessageDistributionRulesModal extends Modal {
 							extractConditionsFromFilterQuery(filterQuery);
 					})
 					.setPlaceholder("example: {{topic=Notes}}{{user=soberhacker}}");
+			});
+		setSettingStyles(setting);
+	}
+
+	addFrontmatterTemplateFilePath() {
+		const setting = new Setting(this.messageDistributionRulesDiv)
+			.setName("Frontmatter template file path")
+			.setDesc("Specify path to template file you want to apply only to new notes")
+			.addSearch((cb) => {
+				new FileSuggest(cb.inputEl, this.plugin);
+				cb.setPlaceholder("example: templates/tg_group_frontmatter.md")
+					.setValue(this.messageDistributionRule.templateFrontmatterFilePath)
+					.onChange(async (path) => {
+						this.messageDistributionRule.templateFrontmatterFilePath = path ? normalizePath(path) : path;
+					});
 			});
 		setSettingStyles(setting);
 	}
@@ -127,6 +144,60 @@ export class MessageDistributionRulesModal extends Modal {
 						this.messageDistributionRule.heading = value;
 					});
 			});
+		setSettingStyles(setting);
+	}
+
+	addEmbedSettings() {
+		const setting = new Setting(this.messageDistributionRulesDiv);
+		setting.setName("What types of data to embed?");
+		setting.setDesc("Choose which attached files should be embedded into the note instead of plain links.");
+
+		const container = setting.controlEl.createDiv();
+		container.style.display = "flex";
+		container.style.flexWrap = "wrap";
+		container.style.gap = "0.75em";
+
+		const addToggle = (label: string, getter: () => boolean, setter: (v: boolean) => void) => {
+			const wrap = container.createDiv();
+			wrap.style.display = "flex";
+			wrap.style.alignItems = "center";
+			const lbl = wrap.createSpan();
+			lbl.textContent = label;
+			lbl.style.marginRight = "0.25em";
+
+			new Setting(wrap)
+				.setName("")
+				.setDesc("")
+				.addToggle((toggle) => {
+					toggle.setValue(getter() ?? true);
+					toggle.onChange(async (value) => {
+						setter(value);
+					});
+				})
+				.infoEl.remove();
+		};
+
+		addToggle(
+			"Images",
+			() => this.messageDistributionRule.embedImages,
+			(v) => (this.messageDistributionRule.embedImages = v),
+		);
+		addToggle(
+			"Audio",
+			() => this.messageDistributionRule.embedAudio,
+			(v) => (this.messageDistributionRule.embedAudio = v),
+		);
+		addToggle(
+			"Video",
+			() => this.messageDistributionRule.embedVideo,
+			(v) => (this.messageDistributionRule.embedVideo = v),
+		);
+		addToggle(
+			"PDF",
+			() => this.messageDistributionRule.embedPdf,
+			(v) => (this.messageDistributionRule.embedPdf = v),
+		);
+
 		setSettingStyles(setting);
 	}
 

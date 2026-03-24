@@ -40,11 +40,17 @@ export function createDefaultMessageFilterCondition(): MessageFilterCondition {
 export interface MessageDistributionRule {
 	messageFilterQuery: string;
 	messageFilterConditions: MessageFilterCondition[];
+	templateFrontmatterFilePath: string;
 	templateFilePath: string;
 	notePathTemplate: string;
 	filePathTemplate: string;
 	reversedOrder: boolean;
 	heading: string;
+
+	embedImages: boolean;
+	embedAudio: boolean;
+	embedVideo: boolean;
+	embedPdf: boolean;
 }
 
 export const defaultTelegramFolder = "Telegram";
@@ -55,11 +61,17 @@ export function createDefaultMessageDistributionRule(): MessageDistributionRule 
 	return {
 		messageFilterQuery: defaultMessageFilterQuery,
 		messageFilterConditions: [createDefaultMessageFilterCondition()],
+		templateFrontmatterFilePath: "",
 		templateFilePath: "",
 		notePathTemplate: `${defaultTelegramFolder}/${defaultNoteNameTemplate}`,
 		filePathTemplate: `${defaultTelegramFolder}/{{file:type}}s/${defaultFileNameTemplate}`,
 		reversedOrder: false,
 		heading: "",
+
+		embedImages: true,
+		embedAudio: true,
+		embedVideo: true,
+		embedPdf: true,
 	};
 }
 
@@ -67,11 +79,17 @@ export function createBlankMessageDistributionRule(): MessageDistributionRule {
 	return {
 		messageFilterQuery: "",
 		messageFilterConditions: [],
+		templateFrontmatterFilePath: "",
 		templateFilePath: "",
 		notePathTemplate: "",
 		filePathTemplate: "",
 		reversedOrder: false,
 		heading: "",
+
+		embedImages: true,
+		embedAudio: true,
+		embedVideo: true,
+		embedPdf: true,
 	};
 }
 
@@ -121,6 +139,8 @@ export function getMessageDistributionRuleInfo(distributionRule: MessageDistribu
 	const messageDistributionRuleInfo: MessageDistributionRuleInfo = { name: "", description: "" };
 	if (distributionRule.notePathTemplate)
 		messageDistributionRuleInfo.description = `Note path: ${distributionRule.notePathTemplate}`;
+	else if (distributionRule.templateFrontmatterFilePath)
+		messageDistributionRuleInfo.description = `Frontmatter template file: ${distributionRule.templateFrontmatterFilePath}`;
 	else if (distributionRule.templateFilePath)
 		messageDistributionRuleInfo.description = `Template file: ${distributionRule.templateFilePath}`;
 	else if (distributionRule.filePathTemplate)

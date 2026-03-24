@@ -168,6 +168,8 @@ export async function handleMessageText(
 	if (noteFolderPath != ".") createFolderIfNotExist(plugin.app.vault, noteFolderPath);
 	else noteFolderPath = "";
 
+	const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, msg);
+
 	await enqueue(
 		appendContentToNote,
 		plugin.app.vault,
@@ -176,8 +178,48 @@ export async function handleMessageText(
 		distributionRule.heading,
 		plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
 		distributionRule.reversedOrder,
+		frontmatterContent,
 	);
 	await finalizeMessageProcessing(plugin, msg);
+}
+
+async function getFrontmatterContent(
+	plugin: TelegramSyncPlugin,
+	distributionRule: MessageDistributionRule,
+	msg: TelegramBot.Message,
+): Promise<string | undefined> {
+	const templatePath = distributionRule.templateFrontmatterFilePath;
+	if (!templatePath) return undefined;
+
+	const processed = await applyNoteContentTemplate(plugin, templatePath, msg, []);
+	const trimmed = processed.trim();
+
+	return trimmed.length > 0 ? trimmed : undefined;
+}
+
+const IMAGE_EXTENSIONS = [".avif", ".bmp", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"];
+const AUDIO_EXTENSIONS = [".flac", ".m4a", ".mp3", ".ogg", ".wav", ".webm", ".3gp"];
+const VIDEO_EXTENSIONS = [".mkv", ".mov", ".mp4", ".ogv", ".webm"];
+const PDF_EXTENSIONS = [".pdf"];
+
+function isEmbedFileExtension(filePath: string, rule: MessageDistributionRule): boolean {
+	const lower = filePath.toLowerCase();
+
+	const embedImages = rule.embedImages ?? true;
+	const embedAudio = rule.embedAudio ?? true;
+	const embedVideo = rule.embedVideo ?? true;
+	const embedPdf = rule.embedPdf ?? true;
+
+	let exts: string[] = [];
+
+	if (embedImages) exts = exts.concat(IMAGE_EXTENSIONS);
+	if (embedAudio) exts = exts.concat(AUDIO_EXTENSIONS);
+	if (embedVideo) exts = exts.concat(VIDEO_EXTENSIONS);
+	if (embedPdf) exts = exts.concat(PDF_EXTENSIONS);
+
+	if (exts.length === 0) return false;
+
+	return exts.some((ext) => lower.endsWith(ext));
 }
 
 async function createNoteContent(
@@ -190,10 +232,25 @@ async function createNoteContent(
 ) {
 	const filesLinks: string[] = [];
 
+	// if (!error) {
+	// 	filesPaths.forEach((fp) => {
+	// 		const filePath = plugin.app.vault.getAbstractFileByPath(fp) as TFile;
+	// 		filesLinks.push(plugin.app.fileManager.generateMarkdownLink(filePath, notePath));
+	// 	});
 	if (!error) {
 		filesPaths.forEach((fp) => {
 			const filePath = plugin.app.vault.getAbstractFileByPath(fp) as TFile;
-			filesLinks.push(plugin.app.fileManager.generateMarkdownLink(filePath, notePath));
+
+			// obsidian basic Markdown link
+			const mdLink = plugin.app.fileManager.generateMarkdownLink(filePath, notePath);
+
+			// to embed or not to embed
+			if (isEmbedFileExtension(filePath.path, distributionRule)) {
+				const embeddedLink = mdLink.replace("[[", "![[");
+				filesLinks.push(embeddedLink);
+			} else {
+				filesLinks.push(mdLink);
+			}
 		});
 	} else {
 		filesLinks.push(`[❌ error while handling file](${error})`);
@@ -331,6 +388,8 @@ async function handleMediaGroup(plugin: TelegramSyncPlugin, distributionRule: Me
 					mg.filesPaths,
 					mg.error,
 				);
+
+				const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, mg.initialMsg);
 				await enqueue(
 					appendContentToNote,
 					plugin.app.vault,
@@ -339,6 +398,7 @@ async function handleMediaGroup(plugin: TelegramSyncPlugin, distributionRule: Me
 					distributionRule.heading,
 					plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
 					distributionRule.reversedOrder,
+					frontmatterContent,
 				);
 				await finalizeMessageProcessing(plugin, mg.initialMsg, mg.error);
 			} catch (e) {
@@ -387,6 +447,8 @@ async function appendFileToNote(
 
 	const noteContent = await createNoteContent(plugin, notePath, msg, distributionRule, [filePath], error);
 
+	const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, msg);
+
 	await enqueue(
 		appendContentToNote,
 		plugin.app.vault,
@@ -395,6 +457,7 @@ async function appendFileToNote(
 		distributionRule.heading,
 		plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
 		distributionRule.reversedOrder,
+		frontmatterContent,
 	);
 }
 

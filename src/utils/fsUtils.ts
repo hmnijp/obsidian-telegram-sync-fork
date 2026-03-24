@@ -79,15 +79,20 @@ export async function appendContentToNote(
 	startLine = "",
 	delimiter = defaultDelimiter,
 	reversedOrder = false,
+	frontmatter?: string,
 ) {
 	if (!notePath || !newContent.trim()) return;
 	if (startLine == undefined) startLine = "";
 
-	const noteFile: TFile = vault.getAbstractFileByPath(notePath) as TFile;
+	const noteFile = vault.getAbstractFileByPath(notePath) as TFile | null;
 
 	let currentContent = "";
 	if (noteFile) currentContent = await vault.read(noteFile);
+
+	const isNewFile = !noteFile || currentContent.length === 0;
+
 	let index = reversedOrder ? 0 : currentContent.length;
+
 	if (currentContent.length == 0 && !startLine) delimiter = "";
 	newContent = reversedOrder ? newContent + delimiter : delimiter + newContent;
 
@@ -97,9 +102,19 @@ export async function appendContentToNote(
 		else newContent = reversedOrder ? newContent + startLine : startLine + newContent;
 	}
 
-	const content = currentContent.slice(0, index) + newContent + currentContent.slice(index);
-	if (!noteFile) await vault.create(notePath, content);
-	else if (currentContent != content) await vault.modify(noteFile, content);
+	let contentToWrite: string;
+
+	if (isNewFile && frontmatter && frontmatter.trim().length > 0) {
+		const fmBlock = frontmatter.trimEnd() + "\n\n";
+		const combined = currentContent.slice(0, index) + newContent + currentContent.slice(index);
+		contentToWrite = fmBlock + combined;
+	} else {
+		contentToWrite = currentContent.slice(0, index) + newContent + currentContent.slice(index);
+	}
+
+	// const content = currentContent.slice(0, index) + newContent + currentContent.slice(index);
+	if (!noteFile) await vault.create(notePath, contentToWrite);
+	else if (currentContent != contentToWrite) await vault.modify(noteFile, contentToWrite);
 }
 
 export function base64ToString(base64: string): string {
