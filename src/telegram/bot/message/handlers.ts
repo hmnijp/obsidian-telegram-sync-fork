@@ -246,7 +246,7 @@ async function createNoteContent(
 
 			// to embed or not to embed
 			if (isEmbedFileExtension(filePath.path, distributionRule)) {
-				const embeddedLink = mdLink.replace("[[", "![[");
+				const embeddedLink = mdLink.replace(/\[\[/g, "![[").replace(/\[([^\]]*)\]\(([^)]+)\)/g, "![]($2)");
 				filesLinks.push(embeddedLink);
 			} else {
 				filesLinks.push(mdLink);
