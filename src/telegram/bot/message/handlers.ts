@@ -33,13 +33,28 @@ interface MediaGroup {
 	filesPaths: string[];
 }
 
+interface MessageMergeGroup {
+	id: string;
+	notePath: string;
+	contents: string[];
+	messages: TelegramBot.Message[];
+	distributionRule: MessageDistributionRule;
+	lastMessageDateSec: number;
+	lastReceivedAtSec: number;
+	frontmatterContent?: string;
+}
+
 const mediaGroups: MediaGroup[] = [];
+const messageMergeGroups: MessageMergeGroup[] = [];
 
 let handleMediaGroupIntervalId: NodeJS.Timer | undefined;
+let handleMessageMergingIntervalId: NodeJS.Timer | undefined;
 
 export function clearHandleMediaGroupInterval() {
 	clearInterval(handleMediaGroupIntervalId);
 	handleMediaGroupIntervalId = undefined;
+	clearInterval(handleMessageMergingIntervalId);
+	handleMessageMergingIntervalId = undefined;
 }
 
 // handle all messages from Telegram
@@ -168,19 +183,110 @@ export async function handleMessageText(
 	if (noteFolderPath != ".") createFolderIfNotExist(plugin.app.vault, noteFolderPath);
 	else noteFolderPath = "";
 
+	const mergingIntervalSec = plugin.settings.messageMergingIntervalSec || 0;
 	const frontmatterContent = await getFrontmatterContent(plugin, distributionRule, msg);
 
+	if (mergingIntervalSec <= 0) {
+		await enqueue(
+			appendContentToNote,
+			plugin.app.vault,
+			notePath,
+			formattedContent,
+			distributionRule.heading,
+			plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
+			distributionRule.reversedOrder,
+			frontmatterContent,
+		);
+		await finalizeMessageProcessing(plugin, msg);
+		return;
+	}
+
+	await appendMergedMessage(
+		plugin,
+		msg,
+		distributionRule,
+		notePath,
+		formattedContent,
+		mergingIntervalSec,
+		frontmatterContent,
+	);
+}
+
+function getMessageMergeGroupId(msg: TelegramBot.Message, distributionRule: MessageDistributionRule, notePath: string) {
+	const userId = msg.from?.id || 0;
+	const topicId = msg.message_thread_id || 0;
+	const mediaGroupId = msg.media_group_id || "";
+	return `${msg.chat.id}:${topicId}:${userId}:${distributionRule.notePathTemplate}:${distributionRule.heading}:${distributionRule.reversedOrder}:${notePath}:${mediaGroupId}`;
+}
+
+async function flushMessageMergeGroup(plugin: TelegramSyncPlugin, group: MessageMergeGroup) {
 	await enqueue(
 		appendContentToNote,
 		plugin.app.vault,
-		notePath,
-		formattedContent,
-		distributionRule.heading,
+		group.notePath,
+		group.contents.join("\n"),
+		group.distributionRule.heading,
 		plugin.settings.defaultMessageDelimiter ? defaultDelimiter : "",
-		distributionRule.reversedOrder,
-		frontmatterContent,
+		group.distributionRule.reversedOrder,
+		group.frontmatterContent,
 	);
-	await finalizeMessageProcessing(plugin, msg);
+
+	for (const message of group.messages) await finalizeMessageProcessing(plugin, message);
+
+	messageMergeGroups.remove(group);
+}
+
+async function handleMessageMerging(plugin: TelegramSyncPlugin) {
+	if (messageMergeGroups.length == 0) {
+		clearInterval(handleMessageMergingIntervalId);
+		handleMessageMergingIntervalId = undefined;
+		return;
+	}
+	if (plugin.messagesLeftCnt > 0) return;
+
+	const nowSec = Math.floor(Date.now() / 1000);
+	for (const group of [...messageMergeGroups]) {
+		if (nowSec - group.lastReceivedAtSec < plugin.settings.messageMergingIntervalSec) continue;
+		try {
+			await flushMessageMergeGroup(plugin, group);
+		} catch (e) {
+			await displayAndLogError(plugin, e, "", "", group.messages[0], 0);
+		}
+	}
+}
+
+async function appendMergedMessage(
+	plugin: TelegramSyncPlugin,
+	msg: TelegramBot.Message,
+	distributionRule: MessageDistributionRule,
+	notePath: string,
+	formattedContent: string,
+	mergingIntervalSec: number,
+	frontmatterContent?: string,
+) {
+	const groupId = getMessageMergeGroupId(msg, distributionRule, notePath);
+	const existingGroup = messageMergeGroups.find((g) => g.id == groupId);
+	if (existingGroup && msg.date - existingGroup.lastMessageDateSec <= mergingIntervalSec) {
+		existingGroup.contents.push(formattedContent);
+		existingGroup.messages.push(msg);
+		existingGroup.lastMessageDateSec = msg.date;
+		existingGroup.lastReceivedAtSec = Math.floor(Date.now() / 1000);
+	} else {
+		if (existingGroup) await flushMessageMergeGroup(plugin, existingGroup);
+		messageMergeGroups.push({
+			id: groupId,
+			notePath,
+			contents: [formattedContent],
+			messages: [msg],
+			distributionRule,
+			lastMessageDateSec: msg.date,
+			lastReceivedAtSec: Math.floor(Date.now() / 1000),
+			frontmatterContent,
+		});
+	}
+
+	if (!handleMessageMergingIntervalId)
+		handleMessageMergingIntervalId = setInterval(async () => await enqueue(handleMessageMerging, plugin), _1sec);
 }
 
 async function getFrontmatterContent(
@@ -330,7 +436,7 @@ export async function handleFiles(
 				fileObjectToUse.file_size,
 				plugin.botUser,
 			);
-			fileByteArray = media instanceof Buffer ? media : Buffer.alloc(0);
+			fileByteArray = media instanceof Buffer ? new Uint8Array(media) : new Uint8Array();
 			const chatId = msg.chat.id < 0 ? msg.chat.id.toString().slice(4) : msg.chat.id.toString();
 			telegramFileName = telegramFileName || `${fileType}_${chatId}_${msg.message_id}`;
 			error = undefined;
@@ -357,7 +463,7 @@ export async function handleFiles(
 			unixTime2Date(msg.date, msg.message_id),
 			fileExtension,
 		);
-		await plugin.app.vault.createBinary(filePath, fileByteArray);
+		await plugin.app.vault.createBinary(filePath, fileByteArray.buffer as ArrayBuffer);
 	} catch (e) {
 		if (error) (error as Error).message = (error as Error).message + " | " + e;
 		else error = e;

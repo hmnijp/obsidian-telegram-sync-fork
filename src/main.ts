@@ -253,6 +253,11 @@ export default class TelegramSyncPlugin extends Plugin {
 			});
 		}
 
+		if (typeof this.settings.messageMergingIntervalSec != "number") {
+			this.settings.messageMergingIntervalSec = 0;
+			needToSaveSettings = true;
+		}
+
 		if (!this.settings.botTokenEncrypted) {
 			this.botTokenEncrypt();
 			needToSaveSettings = true;
