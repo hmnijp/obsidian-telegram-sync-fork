@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.0.3-hmnijp] (2026-03-25)
+merge from [kmx236/obsidian-telegram-sync Fork](https://github.com/kmx236/obsidian-telegram-sync)
+
+### Features
+
+* add time interval grouping
+
+### Bug Fixes
+
+* fix embeddedLink replace
+
+
 ## [4.0.2-hmnijp] (2026-03-24)
 merge from [renameduserid/obsidian-telegram-sync Fork](https://github.com/renameduserid/obsidian-telegram-sync)
 
