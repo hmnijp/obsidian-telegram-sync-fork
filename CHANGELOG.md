@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.1] (2026-03-22)
+
+### Features
+
+* add proxy support for Telegram connections (HTTP, HTTPS, SOCKS4, SOCKS5) in bot settings
+
+### Bug Fixes
+
+* fix compatibility with Node.js v22+ by bundling `punycode` module instead of relying on removed built-in
+* fix `assert { type: "json" }` syntax in install script for Node.js v24 compatibility
+
 ## [4.0.0](https://github.com/soberhacker/obsidian-telegram-sync/compare/3.2.0...4.0.0) (2024-10-30)
 
 

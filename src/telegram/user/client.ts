@@ -16,6 +16,17 @@ import { PromisedWebSockets } from "telegram/extensions";
 
 export type SessionType = "bot" | "user";
 
+export type ProxyProtocol = "http" | "https" | "socks5" | "socks4";
+
+export interface ProxyConfig {
+	enabled: boolean;
+	protocol: ProxyProtocol;
+	host: string;
+	port: number;
+	username: string;
+	password: string;
+}
+
 let client: TelegramClient | undefined;
 let _botToken: string | undefined;
 let _sessionType: SessionType;
@@ -51,7 +62,7 @@ export async function stop() {
 }
 
 // init and connect to Telegram Api
-export async function init(sessionId: number, sessionType: SessionType, deviceId: string) {
+export async function init(sessionId: number, sessionType: SessionType, deviceId: string, proxy?: ProxyConfig) {
 	if (!client || _sessionType !== sessionType || _sessionId !== sessionId) {
 		await stop();
 		const logger = new Logger(LogLevel.ERROR);
@@ -64,14 +75,30 @@ export async function init(sessionId: number, sessionType: SessionType, deviceId
 		const session = new StoreSession(`${sessionType}_${sessionId}_${deviceId}`);
 		_sessionId = sessionId;
 		_sessionType = sessionType;
-		client = new TelegramClient(session, config.dIipa, config.hsaHipa, {
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const clientParams: any = {
 			connectionRetries: 10,
 			deviceModel: os.hostname() || os.type(),
 			appVersion: releaseVersion,
 			useWSS: true,
 			networkSocket: PromisedWebSockets,
 			baseLogger: logger,
-		});
+		};
+
+		if (proxy?.enabled && proxy.host && proxy.port && (proxy.protocol === "socks5" || proxy.protocol === "socks4")) {
+			clientParams.proxy = {
+				ip: proxy.host,
+				port: proxy.port,
+				socksType: proxy.protocol === "socks5" ? 5 : 4,
+				MTProxy: false,
+				secret: "",
+				username: proxy.username || undefined,
+				password: proxy.password || undefined,
+			};
+		}
+
+		client = new TelegramClient(session, config.dIipa, config.hsaHipa, clientParams);
 	}
 
 	if (!client) throw NotConnected;

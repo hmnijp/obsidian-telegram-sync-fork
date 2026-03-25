@@ -23,7 +23,7 @@ export async function connect(
 			await plugin.saveSettings();
 		}
 
-		await Client.init(newSessionId, sessionType, plugin.currentDeviceId);
+		await Client.init(newSessionId, sessionType, plugin.currentDeviceId, plugin.settings.proxySettings);
 
 		if (sessionType == "user" && qrCodeContainer) {
 			await Client.signInAsUserWithQrCode(qrCodeContainer, password);

@@ -18,7 +18,13 @@ export async function connect(plugin: TelegramSyncPlugin) {
 			return;
 		}
 		// Create a new bot instance and start polling
-		plugin.bot = new TelegramBot(await enqueue(plugin, plugin.getBotToken));
+		const botOptions: TelegramBot.ConstructorOptions = {};
+		const proxy = plugin.settings.proxySettings;
+		if (proxy?.enabled && proxy.host && proxy.port) {
+			const auth = proxy.username ? `${encodeURIComponent(proxy.username)}:${encodeURIComponent(proxy.password)}@` : "";
+			botOptions.request = { proxy: `${proxy.protocol}://${auth}${proxy.host}:${proxy.port}` };
+		}
+		plugin.bot = new TelegramBot(await enqueue(plugin, plugin.getBotToken), botOptions);
 		const bot = plugin.bot;
 		// Set connected flag to false and log errors when a polling error occurs
 		bot.on("polling_error", async (error: unknown) => {

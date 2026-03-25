@@ -68,6 +68,7 @@ export interface TelegramSyncSettings {
 	processOldMessagesSettings: ProcessOldMessagesSettings;
 	processOtherBotsMessages: boolean;
 	retryFailedMessagesProcessing: boolean;
+	proxySettings: Client.ProxyConfig;
 	// add new settings above this line
 	topicNames: Topic[];
 }
@@ -92,6 +93,14 @@ export const DEFAULT_SETTINGS: TelegramSyncSettings = {
 	processOldMessagesSettings: getDefaultProcessOldMessagesSettings(),
 	processOtherBotsMessages: false,
 	retryFailedMessagesProcessing: false,
+	proxySettings: {
+		enabled: false,
+		protocol: "socks5",
+		host: "",
+		port: 1080,
+		username: "",
+		password: "",
+	},
 	// add new settings above this line
 	topicNames: [],
 };

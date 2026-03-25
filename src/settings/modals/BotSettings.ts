@@ -2,6 +2,7 @@ import { Modal, Setting } from "obsidian";
 import TelegramSyncPlugin from "src/main";
 import { _5sec, displayAndLog } from "src/utils/logUtils";
 import { PinCodeModal } from "./PinCode";
+import { ProxyProtocol } from "src/telegram/user/client";
 
 export const mainDeviceIdSettingName = "Main device id";
 
@@ -18,6 +19,7 @@ export class BotSettingsModal extends Modal {
 		this.addAllowedChatsSetting();
 		this.addDeviceId();
 		this.addEncryptionByPinCode();
+		this.addProxySettings();
 		this.addFooterButtons();
 	}
 
@@ -159,6 +161,83 @@ export class BotSettingsModal extends Modal {
 			href: "https://github.com/soberhacker/obsidian-telegram-sync/blob/main/docs/Bot%20Token%20Encryption.md",
 			text: "What does this can prevent?",
 		});
+	}
+
+	addProxySettings() {
+		const proxy = this.plugin.settings.proxySettings;
+
+		const proxyHeader = new Setting(this.botSettingsDiv).setName("Proxy").setHeading();
+		proxyHeader.setDesc("Configure a proxy for Telegram connections. SOCKS4/5 applies to both bot and user connections. HTTP/HTTPS applies to bot only.");
+
+		new Setting(this.botSettingsDiv)
+			.setName("Enable proxy")
+			.addToggle((toggle) => {
+				toggle.setValue(proxy.enabled).onChange((value) => {
+					proxy.enabled = value;
+					this.display();
+				});
+			});
+
+		if (!proxy.enabled) return;
+
+		new Setting(this.botSettingsDiv)
+			.setName("Protocol")
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOptions({ http: "HTTP", https: "HTTPS", socks5: "SOCKS5", socks4: "SOCKS4" } as Record<ProxyProtocol, string>)
+					.setValue(proxy.protocol)
+					.onChange((value) => {
+						proxy.protocol = value as ProxyProtocol;
+					});
+			});
+
+		new Setting(this.botSettingsDiv)
+			.setName("Host")
+			.setDesc("Proxy server hostname or IP address.")
+			.addText((text) =>
+				text
+					.setPlaceholder("example: 127.0.0.1")
+					.setValue(proxy.host)
+					.onChange((value) => {
+						proxy.host = value.trim();
+					}),
+			);
+
+		new Setting(this.botSettingsDiv)
+			.setName("Port")
+			.addText((text) =>
+				text
+					.setPlaceholder("example: 1080")
+					.setValue(proxy.port ? String(proxy.port) : "")
+					.onChange((value) => {
+						const parsed = parseInt(value, 10);
+						proxy.port = isNaN(parsed) ? 0 : parsed;
+					}),
+			);
+
+		new Setting(this.botSettingsDiv)
+			.setName("Username")
+			.setDesc("Optional. Leave blank if the proxy requires no authentication.")
+			.addText((text) =>
+				text
+					.setPlaceholder("username")
+					.setValue(proxy.username)
+					.onChange((value) => {
+						proxy.username = value;
+					}),
+			);
+
+		new Setting(this.botSettingsDiv)
+			.setName("Password")
+			.addText((text) => {
+				text.inputEl.type = "password";
+				text
+					.setPlaceholder("password")
+					.setValue(proxy.password)
+					.onChange((value) => {
+						proxy.password = value;
+					});
+			});
 	}
 
 	addFooterButtons() {
