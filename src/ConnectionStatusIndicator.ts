@@ -46,7 +46,9 @@ export default class ConnectionStatusIndicator {
 		}
 		this.create();
 
-		if (this.plugin.isBotConnected()) this.setConnected();
+		const status = this.plugin.getConnectionStatus();
+		if (status == "connected") this.setConnected();
+		else if (status == "connecting") this.setConnecting();
 		else this.setDisconnected(error?.message);
 	}
 
@@ -54,12 +56,24 @@ export default class ConnectionStatusIndicator {
 		if (!this.icon) return;
 		this.label?.setText("");
 		this.label?.removeAttribute("style");
+		this.icon.setAttr("style", "color: #2ecc71;");
 		this.icon.removeAttribute("data-tooltip-position");
 		this.icon.removeAttribute("aria-label");
 	}
 
+	private setConnecting() {
+		if (!this.icon) return;
+		this.label?.setText("");
+		this.icon.setAttr("style", "color: #f39c12;");
+		this.icon.setAttrs({
+			"data-tooltip-position": "top",
+			"aria-label": "Connecting...",
+		});
+	}
+
 	private setDisconnected(error?: string): void {
 		if (!this.icon) return;
+		this.icon.setAttr("style", "color: #e74c3c;");
 		this.icon.setAttrs({
 			"data-tooltip-position": "top",
 			"aria-label": `${error || ""}\n${checkConnectionMessage}`.trimStart(),

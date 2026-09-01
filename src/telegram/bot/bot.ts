@@ -17,6 +17,7 @@ export async function connect(plugin: TelegramSyncPlugin) {
 			plugin.checkingBotConnection = false;
 			return;
 		}
+		plugin.setBotStatus("connecting");
 		// Create a new bot instance and start polling
 		const botOptions: TelegramBot.ConstructorOptions = {};
 		const proxy = plugin.settings.proxySettings;
@@ -111,6 +112,7 @@ async function checkConnectionAfterError(plugin: TelegramSyncPlugin, intervalInS
 	if (!plugin.checkingBotConnection && plugin.isBotConnected()) plugin.lastPollingErrors = [];
 	try {
 		plugin.checkingBotConnection = true;
+		plugin.setBotStatus("connecting");
 		await new Promise((resolve) => setTimeout(resolve, intervalInSeconds * _1sec));
 		plugin.botUser = await plugin.bot.getMe();
 		plugin.setBotStatus("connected");

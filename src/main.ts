@@ -35,8 +35,7 @@ import { clearCachedUnprocessedMessages, forwardUnprocessedMessages } from "./te
 import { decrypt, encrypt } from "./utils/crypto256";
 import { PinCodeModal } from "./settings/modals/PinCode";
 
-// TODO LOW: add "connecting"
-export type ConnectionStatus = "connected" | "disconnected";
+export type ConnectionStatus = "connected" | "disconnected" | "connecting";
 export type PluginStatus = "unloading" | "unloaded" | "loading" | "loaded";
 
 // Main class for the Telegram Sync plugin
@@ -276,12 +275,17 @@ export default class TelegramSyncPlugin extends Plugin {
 		return this.botStatus === "connected";
 	}
 
+	getConnectionStatus(): ConnectionStatus {
+		return this.botStatus;
+	}
+
 	async setBotStatus(status: ConnectionStatus, error?: Error) {
 		if (this.botStatus == status && !error) return;
 
 		this.botStatus = status;
 		this.connectionStatusIndicator?.update(error);
 
+		if (status == "connecting") return;
 		if (this.isBotConnected()) displayAndLog(this, StatusMessages.BOT_CONNECTED, 0);
 		else if (!error) displayAndLog(this, StatusMessages.BOT_DISCONNECTED, 0);
 		else displayAndLogError(this, error, StatusMessages.BOT_DISCONNECTED, checkConnectionMessage, undefined, 0);
