@@ -56,7 +56,7 @@ export default class ConnectionStatusIndicator {
 		if (!this.icon) return;
 		this.label?.setText("");
 		this.label?.removeAttribute("style");
-		this.icon.setAttr("style", "color: #2ecc71;");
+		this.icon.setAttr("style", "color: #43b071;");
 		this.icon.removeAttribute("data-tooltip-position");
 		this.icon.removeAttribute("aria-label");
 	}
@@ -64,7 +64,7 @@ export default class ConnectionStatusIndicator {
 	private setConnecting() {
 		if (!this.icon) return;
 		this.label?.setText("");
-		this.icon.setAttr("style", "color: #f39c12;");
+		this.icon.setAttr("style", "color: #c58826;");
 		this.icon.setAttrs({
 			"data-tooltip-position": "top",
 			"aria-label": "Connecting...",
